@@ -2,31 +2,67 @@ import './index.css';
 import Header from '../Header/Header';
 import CardList from '../CardList/CardList'
 import { useEffect, useState } from 'react';
-import data from '../../assets/data.json';
+// import data from '../../assets/data.json';
 import Logo from '../Logo/Logo';
 import Search from '../Search/Search';
 import Footer from '../Footer/Footer';
-import Button from '../Button/Button';
+// import Button from '../Button/Button';
+import api from "../../utils/api";
+import SearchInfo from '../SearchInfo/SearchInfo';
+import useDebounce from '../../hooks/useDebounce';
+import Card from '../Card/Card';
 
 
 function Application() {
    
-    const [cards, setCards] = useState(data);
-
+    const [cards, setCards] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
     // нужно хранить строку которую вводит пользователь, ее нужно положить в стэйт
     const [searchQuery, setSearchQuery] = useState('');
+    // сохраняем в переменную вывод вводимой строки с задержкой
+    const debounceSearchQuery = useDebounce(searchQuery, 300);
 
-    // при вводе данных пользователем searchQuery меняется и с его изменениями нужно запустить handleRequest функцию
+   
+    useEffect(() => {
+         Promise.all([api.getUserInfo(), api.getProductList()])
+        //  then принимает массив, нейминг соответствует передающимся элементам
+         .then(([userData, cardData]) => {
+            setCurrentUser(userData);
+            setCards(cardData.products);
+         }).catch(err => console.log(err));
+
+        // данный подход не очень хорош, т.к. отрисовка например карточек будет зависить от пользователя. Если делаем два отдельных промиса кто-то выполнится раньше, кто-то позже, все может зависнуть и поломаться. Поэтому лучше использовать метод  Promise.all: мы отправим пачку промисов, дождемся пока они все выполнятся и тогда проблемм не будет
+        // useEffect(() => {
+        // если получили успешный ответ от сервера (данные пользователя пришли userData), то ч/з then мы ими оперируем, нам необходимо ее положить в стейт (заводим отдельный стейт currentUser)
+        // api.getUserInfo().then((userData) => {
+        //     setcarrentUser(userData);
+        // })
+        // запрос уходит за продуктами
+        // api.getProductList().then((cardData) => {
+            // приходит объект total, а нам нужно достать products
+            // console.log('cardData--->', cardData);
+        // запишем в наши карточки
+        // setCards(cardData.products);
+        // })
+        // пустой массив зависимостей, чтобы выполнилось 1 раз
+    }, []);
+
+    // при вводе данных пользователем searchQuery меняется (сделали с задержкой, поэтому передаем debounceSearchQuery) и с его изменениями нужно запустить handleRequest функцию
     useEffect(() => {
         handleRequest();
-    }, [searchQuery]);
+        // console.log('INPUT', debounceSearchQuery)
+    }, [debounceSearchQuery]);
 
     // функция работает с данными сервера/функция запроса
     const handleRequest = () => {
         // когда будет осуществляться поиск мы будем идти в базу данных товаров (data)/item - товары/проверяем нашу введенную строку searchQuery если она будет содержаться в имени (методом подстрок includesбудет искать searchQuery), если по условию будет true, то это вернется в массив filterCard/перевели все строки в верхний регистр
-        const filterCard = data.filter(item => item.name.toUpperCase().includes(searchQuery.toUpperCase()));
-        // записываем отфильтрованный результат в карточки, данные поменяются и далее в <CardList goods={cards}/> перерендарятся, а далее эта функция вызывается в useEffect
-        setCards(filterCard);
+        // const filterCard = data.filter(item => item.name.toUpperCase().includes(searchQuery.toUpperCase()));
+
+        // когда мы будем вызывать ф-цию, будем печатать текст, он будет приходить в строку searchQuery, мы отправляем его на сервер и сервер возвращает нам данные с этими карточками и  мы их записываем в стейт, стейт изменится и реакт поймет, что нужно перерендерить наш дом.
+        api.search(debounceSearchQuery).then(data => {
+        setCards(data);
+        // если будет ошибка
+        }).catch(err => console.log(err));
     }
 
 
@@ -44,6 +80,32 @@ function Application() {
         setSearchQuery(inputValue)
     }
 
+    // изменении данных о пользователе
+    const handleUpdateUser = (userUpdate) => {
+        api.setUserInfo(userUpdate).then((newUserData) => {
+            setCurrentUser(newUserData);
+        })
+    }
+
+    // функция обработчик события, кот. будет висет на сердечке и по клику на него что-то делать/функции отвечающие за какие-то события (клик на кнопку) называют с ключевого слова headle
+    const handleProductLike = (product) => {
+        // нужно в массиве likes (id пользователей кот. лайкнули этот товар) искать id, если она существует, то лайк надо поставить, если ее нет, то не ставим/создаем булевую переменную и присваеваем ей объект product (массив товаров), у него брать массив лайков и методом some (проверяет удовлетворяет ли какой-либо элем. массива условию(берем id и проверяем если она равна id текущего пользователя, то вернем тру), заданному в передаваемой ф-ции и возвращает тру/фолс)
+        const isLiked = product.likes.some(id => id === currentUser._id); 
+        //  в зависимости от того есть ли лайки или нет отправляем запрос "DELETE" или "PUT"/ !isLiked - это фолс
+        api.changeLikeProduct(product._id, isLiked).then((newCard) => { 
+            // чтобы не делать доп. запрос для получения карточек с актуальными лайками мы текущие карточки, кот есть на клиенте перебираем и при выполении условия получаем:
+            const newCards = cards.map((card) => {
+                // console.log('Карточка в переборе', card);
+                // console.log('Карточка с сервера', newCard);
+
+                // если карточка старая совпадаем с новой карточкой (то что ответил сервер после изменения лайка newCard) то берем новую, если нет - старую
+                return card._id === newCard._id ? newCard : card;
+            })
+            // получившейся массив пишем в стейт
+            setCards(newCards);
+        })
+    }
+
     // Инлайноввй стиль в JSX/примеры
     // const margin = 50;
     // const StyleHead = {
@@ -54,14 +116,18 @@ function Application() {
 
     return (
         <>
-            <Header>
+            {/* пока пробросим текущего и обновленного пользователя сюда */}
+            <Header user={currentUser} updateUserHandle={handleUpdateUser}>
                 <Logo className='logo logo_place_header' href='/'/>
                 <Search onInput={handleInputChange} onSubmit={handleFormSubmit}/>
             </Header>
 
             {/* чтобы футер прилип книзу */}
             <main className='content container'>
-                <CardList goods={cards}/>
+                {/* принимает кол-во карточек и введеный текст */}
+                <SearchInfo searchCount={cards.length} searchText={searchQuery}/>
+                {/* пробрасываем лайки и  текущего юзера, чтобы смотреть его id */}
+                <CardList goods={cards} onProductLike={handleProductLike} currentUser={currentUser}/>
 
                 {/* Примеры classnames принимаем стили с условием */}
                 {/* <Button type="primary">Купить</Button>
