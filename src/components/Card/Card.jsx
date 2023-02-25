@@ -2,12 +2,14 @@ import './index.css';
 // достаем svg для лайков как реакт компонент
 import { ReactComponent as Save} from "./save.svg";
 import cn from "classnames";
+import { calcDiscountPrice, isLiked} from '../../utils/products';
 
 // использует деструкторизацию ключей объекта
 const Card = ({ name, price, discount, wight, description, pictures, tags, currentUser, onProductLike, likes, _id }) => {
-    // считаем прайс со скидкой/ округляем до ближайшего целого числа
-    const discountPrice = Math.round(price - price * discount / 100);
-    const isLiked  = likes.some(id => id === currentUser?._id);
+    // считаем прайс со скидкой/ округляем до ближайшего целого числа (ф-ция в утилитах)
+    const discountPrice = calcDiscountPrice(price, discount);
+    // currentUser?._id эта запись эквивалентна currentUser ? currentUser._id : '' - если юзер есть, то возьми у него id иначе ничего не берем. Если структура вложенности есть еще, то можно продолжать уточения/проверку currentUser?._id?.trolololo
+    const liked = isLiked(likes, currentUser?._id);
 
     const handleLikeClick = () => {
         // console.log('click', isLiked);
@@ -30,7 +32,7 @@ const Card = ({ name, price, discount, wight, description, pictures, tags, curre
         <div className='card__sticky card__sticky_type_top-right'>
             <button className={cn ('card__favorite', {
                 // первый аргумент обязательный, а далее в {} условие: если isLiked будет тру, то класс применяй 
-                'card__favorite_is-active': isLiked
+                'card__favorite_is-active': liked
             })} onClick={handleLikeClick}>
             <Save className='card__favorite-icon'/>
             </button>

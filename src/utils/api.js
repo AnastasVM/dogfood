@@ -26,6 +26,14 @@ class Api {
         }).then(onResponse)
     }
 
+    // получение продукта по id
+    getProductById(idProduct) {
+        return fetch(`${this._baseUrl}/products/${idProduct}`, {
+            headers: this._headers,
+            // then возвращает res (респонс) запроса
+        }).then(onResponse)
+    }
+
     // изменить данные пользователя
     setUserInfo(dataUser) {
         return fetch(`${this._baseUrl}/users/me`, {
