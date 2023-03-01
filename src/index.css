@@ -39,3 +39,10 @@ img {
   flex-direction: column;
   min-height: 100vh;
 }
+
+/* можно создать все переменные с цветами и далее их использовать в любом месте проекта */
+:root {
+  --text-main-color: #1A1A1A;
+
+  --primary-main-color: #FFE44D;
+}

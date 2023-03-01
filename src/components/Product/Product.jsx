@@ -7,8 +7,11 @@ import {ReactComponent as Save} from "./image/save.svg";
 // делаем путь к src
 import truck from './image/truck.svg';
 import quality from './image/quality.svg';
+import { useNavigate } from "react-router-dom";
 
 const Product = ({currentUser, _id, onProductLike, available, description, discount, price, name, pictures, likes}) => {
+
+    const navigate = useNavigate();
 
     // считаем прайс со скидкой/ округляем до ближайшего целого числа (ф-ция в утилитах)
     const discountPrice = calcDiscountPrice(price, discount);
@@ -20,7 +23,7 @@ const Product = ({currentUser, _id, onProductLike, available, description, disco
     return (
         <>
             <div>
-                <a className="button-back" href="#">Назад</a>
+                <a className="button-back" href="#" onClick={() => navigate(-1)}>Назад</a>
                 <h1 className={s.productTitle}>{name}</h1>
                 <div>
                     <span>Артикул: <b>2388907</b></span>

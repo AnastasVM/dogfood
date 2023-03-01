@@ -1,8 +1,6 @@
-import s from './App.module.css';
+// import s from './App.module.css';
 import Header from '../Header/Header';
-import CardList from '../CardList/CardList'
 import { useEffect, useState } from 'react';
-// import data from '../../assets/data.json';
 import Logo from '../Logo/Logo';
 import Search from '../Search/Search';
 import Footer from '../Footer/Footer';
@@ -11,8 +9,12 @@ import api from "../../utils/api";
 import SearchInfo from '../SearchInfo/SearchInfo';
 import useDebounce from '../../hooks/useDebounce';
 import { isLiked } from '../../utils/products';
-import Spinner from '../Spiner/Spiner';
-import Card from '../Card/Card';
+import { Route, Routes } from 'react-router-dom';
+import CatalogPage from '../../pages/CatalogPage/CatalogPage';
+import ProductPage from '../../pages/ProductPage/ProductPage';
+import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
+import { UserContext } from '../../context/userContext';
+import { CardContext } from '../../context/cardContext';
 
 
 function Application() {
@@ -130,39 +132,38 @@ function Application() {
     // }
 
     return (
-        <>
+        // value это обязательное поле - это объект (ключ: значение)/ Внедняем данные из стейта currentUser с помощью провайдера контекста/ Всем дочерним элементам доступен контекст
+        <UserContext.Provider value={{user: currentUser, isLoading}}>
+            <CardContext.Provider value={{cards, handleLike: handleProductLike}}>
             {/* пока пробросим текущего и обновленного пользователя сюда */}
             <Header user={currentUser} updateUserHandle={handleUpdateUser}>
                 <Logo className='logo logo_place_header' href='/'/>
-                <Search onInput={handleInputChange} onSubmit={handleFormSubmit}/>
-            </Header>
 
+                <Routes>
+                    {/* Если путь будет / то возьми и зарендери элемент поиска (на отдельной странице товара его не будет) */}
+                    <Route path="/" element={
+                         <Search onInput={handleInputChange} onSubmit={handleFormSubmit}/>
+                    }/>
+                </Routes>
+            </Header>
             {/* чтобы футер прилип книзу */}
             <main className='content container'>
                 {/* принимает кол-во карточек и введеный текст */}
                 <SearchInfo searchCount={cards.length} searchText={searchQuery}/>
-                {/* если  isLoading тру, то показывай спинер, а иначе карточки*/}
-                 {isLoading ? (
-                       <Spinner /> 
-                 ) : (
 
-                //  {/* пробрасываем лайки и  текущего юзера, чтобы смотреть его id */}
-                    <CardList goods={cards} onProductLike={handleProductLike} currentUser={currentUser}/>
-                 ) }
-               
-                {/* Примеры classnames принимаем стили с условием */}
-                {/* <Button type="primary">Купить</Button>
-                <Button type="secondary">Оплатить</Button> */}
+                <Routes>
+                    {/* параметр path="/" это тоже самое, что index/указываем какой элемент нам нужно рендерить если пользователь запрашивает корневую страницу сайта (localhost:3000/) и прокидываем в него пропсы */}
+                    <Route index element={<CatalogPage />}/>
+                    {/* Хотим чтобы передавались динамически параметры и хук useParams доставал эти значения/именно по данному ключу productId в компоненте страницы будем доставать эту id */}
+                    <Route path="/product/:productId" element={<ProductPage />}/>
+                    {/* когда мы делаем запрос на рендер какого-т компонента по какому-то пути, то реакт роутер дом внутри ищет указанный url и если его не найдет, то даст path="*" 'это страница 404 ошибка */}
+                    <Route path="*" element={<NotFoundPage/>}/>
+                </Routes>
 
-                {/* Инлайновый стиль в JSX/примеры */}
-                {/* <h1 style={{color: "red",fontSize: "12px"}}>Стилизованный заголовок</h1> 
-                    <h1 style={StyleHead}>Стилизованный заголовок</h1> 
-                */}
-            </main>
-                
-            <Footer/>
-           
-        </>
+            </main>   
+            <Footer/> 
+            </CardContext.Provider>
+        </UserContext.Provider>
     )
 }
 

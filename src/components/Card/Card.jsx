@@ -3,6 +3,7 @@ import './index.css';
 import { ReactComponent as Save} from "./save.svg";
 import cn from "classnames";
 import { calcDiscountPrice, isLiked} from '../../utils/products';
+import { Link } from 'react-router-dom';
 
 // использует деструкторизацию ключей объекта
 const Card = ({ name, price, discount, wight, description, pictures, tags, currentUser, onProductLike, likes, _id }) => {
@@ -38,7 +39,8 @@ const Card = ({ name, price, discount, wight, description, pictures, tags, curre
             </button>
         </div>
         {/* чтобы все было кликабельно завернули в тег а */}
-        <a href="#" className='card__link'>
+        {/* to - обязательный параметр Link, без него работать не будет */}
+        <Link to={`/product/${_id}`} className='card__link'>
         <img src={pictures} className='card__image' alt={description}/>
             <div className='card__desc'>
                 {/* &nbsp; - неразры́вный пробе́л, говорит что то что справа от него (₽) и то что слева от него не должны быть разделимо, между ними не должно быть переноса, на др. строку переносятся вместе// Условие, если скидка не равна нулю, то добавляем класс (красная цена товара), а если нет, то добавляем класс, где цена товара черная */}
@@ -49,7 +51,7 @@ const Card = ({ name, price, discount, wight, description, pictures, tags, curre
                 <span className='card__wight'>{wight}</span>
                 <p className='card__name'>{name}</p>
             </div>
-        </a>
+        </Link>
         <a href="#" className='card__cart btn btn_type_primary'>В корзину</a>
 
       </div>
