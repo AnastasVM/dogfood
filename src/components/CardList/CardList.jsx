@@ -9,10 +9,10 @@ import { useNavigate } from 'react-router-dom';
 // import data from '../../assets/data.json';
 
 // Будет отрисовывать все карточки, который приходят с сервера
-const CardList = () => {
+const CardList = ({cards}) => {
 
     const { user: currentUser, isLoading} = useContext(UserContext);
-    const { cards, handleLike} = useContext(CardContext);
+    const { handleLike} = useContext(CardContext);
     const navigate = useNavigate();
   
     return (

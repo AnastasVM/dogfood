@@ -1,6 +1,6 @@
 // import s from './App.module.css';
 import Header from '../Header/Header';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Logo from '../Logo/Logo';
 import Search from '../Search/Search';
 import Footer from '../Footer/Footer';
@@ -15,11 +15,14 @@ import ProductPage from '../../pages/ProductPage/ProductPage';
 import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
 import { UserContext } from '../../context/userContext';
 import { CardContext } from '../../context/cardContext';
+import FavouritesPage from '../../pages/FavouritesPage/FavouritesPage';
 
 
 function Application() {
    
     const [cards, setCards] = useState([]);
+    //хранит данные избранное(есть лайки), далее пробрасываем в контекст
+    const [favourites, setFavourites] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     // нужно хранить строку которую вводит пользователь, ее нужно положить в стэйт
     const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +40,9 @@ function Application() {
          .then(([userData, cardData]) => {
             setCurrentUser(userData);
             setCards(cardData.products);
+            // Пполученные данные с сервера сразу отфильтруем карточки у которых стоит лайк и положим в массив/item -каждая карточка товара
+            const favouritesProducts = cardData.products.filter(item => isLiked(item.likes, userData._id));
+            setFavourites(favouritesProducts);
          })
          .catch(err => console.log(err))
         //  пока не подгрузились данные из сервера показывается спинер
@@ -105,23 +111,30 @@ function Application() {
     }
 
     // функция обработчик события, кот. будет висет на сердечке и по клику на него что-то делать/функции отвечающие за какие-то события (клик на кнопку) называют с ключевого слова headle
-    const handleProductLike = (product) => {
+    const handleProductLike = useCallback((product) => {
         // нужно в массиве likes (id пользователей кот. лайкнули этот товар) искать id текущего кользователя, если она существует, то лайк надо поставить, если ее нет, то не ставим/
         const liked = isLiked(product.likes, currentUser._id);
         //  в зависимости от того есть ли лайки или нет отправляем запрос "DELETE" или "PUT"/ !isLiked - это фолс
-        api.changeLikeProduct(product._id, liked).then((newCard) => { 
+        return api.changeLikeProduct(product._id, liked).then((newCard) => { 
             // чтобы не делать доп. запрос для получения карточек с актуальными лайками мы текущие карточки, кот есть на клиенте перебираем и при выполении условия получаем:
-            const newCards = cards.map((card) => {
+                const newCards = cards.map((card) => {
                 // console.log('Карточка в переборе', card);
                 // console.log('Карточка с сервера', newCard);
-
                 // если карточка старая совпадаем с новой карточкой (то что ответил сервер после изменения лайка newCard) то берем новую, если нет - старую
                 return card._id === newCard._id ? newCard : card;
             })
+            // если карточка новая и она была не лайкнута, то берем массив карточек старых и в него добавляем новую карточку
+            if (!liked) {
+                setFavourites(prevState => [...prevState, newCard])
+        } else {
+            // а если новая карточка была лайкнута, то ее нужно удалить из массива, для этого используем фильтр (вернет новый массив всего, что вернет истину в скобках)
+                setFavourites(prevState => prevState.filter(card => card._id !== newCard._id));
+        }
             // получившейся массив пишем в стейт
             setCards(newCards);
+            return newCard
         })
-    }
+    }, [cards, currentUser])
 
     // Инлайноввй стиль в JSX/примеры
     // const margin = 50;
@@ -134,7 +147,7 @@ function Application() {
     return (
         // value это обязательное поле - это объект (ключ: значение)/ Внедняем данные из стейта currentUser с помощью провайдера контекста/ Всем дочерним элементам доступен контекст
         <UserContext.Provider value={{user: currentUser, isLoading}}>
-            <CardContext.Provider value={{cards, handleLike: handleProductLike}}>
+            <CardContext.Provider value={{cards, favourites, handleLike: handleProductLike, isLoading}}>
             {/* пока пробросим текущего и обновленного пользователя сюда */}
             <Header user={currentUser} updateUserHandle={handleUpdateUser}>
                 <Logo className='logo logo_place_header' href='/'/>
@@ -156,6 +169,7 @@ function Application() {
                     <Route index element={<CatalogPage />}/>
                     {/* Хотим чтобы передавались динамически параметры и хук useParams доставал эти значения/именно по данному ключу productId в компоненте страницы будем доставать эту id */}
                     <Route path="/product/:productId" element={<ProductPage />}/>
+                    <Route path="/favourites" element={<FavouritesPage/>}/>
                     {/* когда мы делаем запрос на рендер какого-т компонента по какому-то пути, то реакт роутер дом внутри ищет указанный url и если его не найдет, то даст path="*" 'это страница 404 ошибка */}
                     <Route path="*" element={<NotFoundPage/>}/>
                 </Routes>

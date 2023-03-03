@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import s from './Product.module.css';
 import { calcDiscountPrice, createMarkup, isLiked } from "../../utils/products";
 import cn from "classnames";
@@ -8,10 +8,12 @@ import {ReactComponent as Save} from "./image/save.svg";
 import truck from './image/truck.svg';
 import quality from './image/quality.svg';
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/userContext";
 
-const Product = ({currentUser, _id, onProductLike, available, description, discount, price, name, pictures, likes}) => {
+const Product = ({ _id, onProductLike, available, description, discount, price, name, pictures, likes}) => {
 
     const navigate = useNavigate();
+    const { user: currentUser } = useContext(UserContext);
 
     // считаем прайс со скидкой/ округляем до ближайшего целого числа (ф-ция в утилитах)
     const discountPrice = calcDiscountPrice(price, discount);
