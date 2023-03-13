@@ -2,32 +2,22 @@
 import s from './Header.module.css';
 // cn - название функции, может быть разным, но принято называть так
 import cn from 'classnames';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {ReactComponent as FavouriteIcon} from './img/favorites.svg';
+import {ReactComponent as UserIcon} from './img/profile.svg';
 import { useContext } from 'react';
 import { CardContext } from '../../context/cardContext';
 
 
-const Header = ({user, updateUserHandle, children}) => {
+const Header = ({ children, setModalOpen}) => {
 
     const { favourites } = useContext(CardContext);
-
-    // const handleClickButtonEdit = (e) => {
-    //     e.preventDefault();
-    //     // сейчас захаркодили, по клику данные должны приходить с формы
-    //     updateUserHandle({name: "Анастасия Мысник", about: 'Ученик'});
-    // }
+    const location = useLocation();
+    console.log('location--->', location);
   
     return (
         <header className={cn(s.header, 'cover')}>
             <div className="container">
-                {/* условие: если почта придет, то спан покажется/user?.email  означает,что если user есть то тогда возьми от него email...эта запись эквивалентна записи: user !== null */}
-                {/* {user?.email && <span>{user?.email}</span>} */}
-                {/* тоже условие что выше, только другой синтаксис */}
-                {/* {user?.name ? <span>{user?.name}</span> : null} */}
-
-                {/* кнопка по которой будем менять */}
-                {/* <button onClick={handleClickButtonEdit}>Изменить</button> */}
 
                 <div className={s.wrapper}>
                     {children}
@@ -37,6 +27,15 @@ const Header = ({user, updateUserHandle, children}) => {
                             {/* если длина массива лайков не равна 0, то берем обычный спан */}
                             {favourites.length !== 0 && <span className={s.iconBubble}>{favourites.length}</span>}
                         </Link>
+                        {/* если пользователь залогинин/обернуть в линк, т.к. по клику будем проходить в личный кабинет, пока без этого */}
+                        <div className={s.userIcon}>
+                            {/* чтобы осуществить роутинг по модальным укнам у линка есть стейт с объектом/ при нажатии на кнопку войти мы кладем в стейт локейшена новый стейт, сохраняем фоновый адрес backgroundLocation, ссылка обратно сохраняется */}
+                            <Link to="/login" state={{
+                                backgroundLocation: location,
+                                // инишелПаф записала в срейт, чтобы потом обратно на него откатиться
+                                initialPath: location.pathname
+                                }}><UserIcon/></Link>
+                        </div>
                     </div>
                 </div>
             </div>

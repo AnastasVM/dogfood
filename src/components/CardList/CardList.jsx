@@ -6,8 +6,6 @@ import { CardContext } from '../../context/cardContext';
 import NotFound from '../NotFound/NotFound';
 import { useNavigate } from 'react-router-dom';
 
-// import data from '../../assets/data.json';
-
 // Будет отрисовывать все карточки, который приходят с сервера
 const CardList = ({cards}) => {
 

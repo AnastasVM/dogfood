@@ -14,6 +14,7 @@
 
 .iconsMenu {
     display: flex;
+    column-gap: 10px;
 }
 
 .favouritesLink {
@@ -22,9 +23,22 @@
     height: 34px;
 }
 
+.userIcon {
+    cursor: pointer;
+}
+
+.userIcon svg:hover {
+    opacity: .7;
+    /* fill: #dc0404; */
+}
+
 .iconsMenu svg{
     width: 100%;
     height: 100%;
+}
+
+.iconsMenu svg:hover {
+    opacity: .7;
 }
 
 .iconBubble{

@@ -1,22 +1,23 @@
-// import s from './App.module.css';
 import Header from '../Header/Header';
 import { useCallback, useEffect, useState } from 'react';
 import Logo from '../Logo/Logo';
 import Search from '../Search/Search';
 import Footer from '../Footer/Footer';
-// import Button from '../Button/Button';
 import api from "../../utils/api";
 import SearchInfo from '../SearchInfo/SearchInfo';
 import useDebounce from '../../hooks/useDebounce';
 import { isLiked } from '../../utils/products';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import CatalogPage from '../../pages/CatalogPage/CatalogPage';
 import ProductPage from '../../pages/ProductPage/ProductPage';
 import NotFoundPage from '../../pages/NotFoundPage/NotFoundPage';
 import { UserContext } from '../../context/userContext';
 import { CardContext } from '../../context/cardContext';
 import FavouritesPage from '../../pages/FavouritesPage/FavouritesPage';
-
+import RegistrationForm from '../Forms/RegistrationForm/RegistrationForm';
+import Modal from '../Modal/Modal';
+import LoginForm from '../Forms/LoginForm/LoginForm';
+import ResetPasswordForm from '../Forms/ResetPasswordForm/ResetPasswordForm';
 
 function Application() {
    
@@ -28,10 +29,18 @@ function Application() {
     const [searchQuery, setSearchQuery] = useState('');
     // спинер
     const [isLoading, setIsLoading] = useState(false);
-
+    const [contacts, setContacts] = useState([]);
     // сохраняем в переменную вывод вводимой строки с задержкой
     const debounceSearchQuery = useDebounce(searchQuery, 300);
+    const location = useLocation();
+    // создаем переменные, кот. как аргументы пробросим в роутер (модальные окна)
+    // стейт есть у локейшена всегда, а бекграундЛокейшен и initialPath есть не всегда, поэтому ставим ? проверку, если есть
+    const backgroundLocation = location.state?.backgroundLocation;
+    const initialPath = location.state?.initialPath;
 
+    const addContact = (contactInfo) => {
+        setContacts([...contacts, contactInfo]);
+    }
    
     useEffect(() => {
         setIsLoading(true);
@@ -49,35 +58,16 @@ function Application() {
          .finally(() => {
             setIsLoading(false)
         })
-
-        // данный подход не очень хорош, т.к. отрисовка например карточек будет зависить от пользователя. Если делаем два отдельных промиса кто-то выполнится раньше, кто-то позже, все может зависнуть и поломаться. Поэтому лучше использовать метод  Promise.all: мы отправим пачку промисов, дождемся пока они все выполнятся и тогда проблемм не будет
-        // useEffect(() => {
-        // если получили успешный ответ от сервера (данные пользователя пришли userData), то ч/з then мы ими оперируем, нам необходимо ее положить в стейт (заводим отдельный стейт currentUser)
-        // api.getUserInfo().then((userData) => {
-        //     setcarrentUser(userData);
-        // })
-        // запрос уходит за продуктами
-        // api.getProductList().then((cardData) => {
-            // приходит объект total, а нам нужно достать products
-            // console.log('cardData--->', cardData);
-        // запишем в наши карточки
-        // setCards(cardData.products);
-        // })
-        // пустой массив зависимостей, чтобы выполнилось 1 раз
     }, []);
 
     // при вводе данных пользователем searchQuery меняется (сделали с задержкой, поэтому передаем debounceSearchQuery) и с его изменениями нужно запустить handleRequest функцию
     useEffect(() => {
         handleRequest();
-        // console.log('INPUT', debounceSearchQuery)
     }, [debounceSearchQuery]);
 
     // функция работает с данными сервера/функция запроса
     const handleRequest = () => {
-        setIsLoading(true);
-        // когда будет осуществляться поиск мы будем идти в базу данных товаров (data)/item - товары/проверяем нашу введенную строку searchQuery если она будет содержаться в имени (методом подстрок includesбудет искать searchQuery), если по условию будет true, то это вернется в массив filterCard/перевели все строки в верхний регистр
-        // const filterCard = data.filter(item => item.name.toUpperCase().includes(searchQuery.toUpperCase()));
-
+        setIsLoading(true);       
         // когда мы будем вызывать ф-цию, будем печатать текст, он будет приходить в строку searchQuery, мы отправляем его на сервер и сервер возвращает нам данные с этими карточками и  мы их записываем в стейт, стейт изменится и реакт поймет, что нужно перерендерить наш дом.
         api.search(debounceSearchQuery).then(data => {
         setCards(data);
@@ -87,7 +77,6 @@ function Application() {
             setIsLoading(false);
         })
     }
-
 
     // функция будет брать данные из формы/во время поиска при нажатии на лупу, вызыввем функцию и отменяем поведение браузера по умолчанию
     function handleFormSubmit(e) {
@@ -118,8 +107,6 @@ function Application() {
         return api.changeLikeProduct(product._id, liked).then((newCard) => { 
             // чтобы не делать доп. запрос для получения карточек с актуальными лайками мы текущие карточки, кот есть на клиенте перебираем и при выполении условия получаем:
                 const newCards = cards.map((card) => {
-                // console.log('Карточка в переборе', card);
-                // console.log('Карточка с сервера', newCard);
                 // если карточка старая совпадаем с новой карточкой (то что ответил сервер после изменения лайка newCard) то берем новую, если нет - старую
                 return card._id === newCard._id ? newCard : card;
             })
@@ -135,14 +122,6 @@ function Application() {
             return newCard
         })
     }, [cards, currentUser])
-
-    // Инлайноввй стиль в JSX/примеры
-    // const margin = 50;
-    // const StyleHead = {
-    //     color: "red",
-    //     marginTop: "20px",
-    //     marginBottom: `${margin}px`
-    // }
 
     return (
         // value это обязательное поле - это объект (ключ: значение)/ Внедняем данные из стейта currentUser с помощью провайдера контекста/ Всем дочерним элементам доступен контекст
@@ -163,16 +142,40 @@ function Application() {
             <main className='content container'>
                 {/* принимает кол-во карточек и введеный текст */}
                 <SearchInfo searchCount={cards.length} searchText={searchQuery}/>
-
-                <Routes>
+                {/* делаем роутинг модальных окон/условие, если бекграундЛокейшен есть, то возьми все, что внутри него, развернули рест оператором и в pathname пробросим initialPath если он есть, а иначе возьми свой обычный локейшен  */}
+                <Routes location={(backgroundLocation && {...backgroundLocation, pathname: initialPath} ) || location}>
                     {/* параметр path="/" это тоже самое, что index/указываем какой элемент нам нужно рендерить если пользователь запрашивает корневую страницу сайта (localhost:3000/) и прокидываем в него пропсы */}
                     <Route index element={<CatalogPage />}/>
                     {/* Хотим чтобы передавались динамически параметры и хук useParams доставал эти значения/именно по данному ключу productId в компоненте страницы будем доставать эту id */}
                     <Route path="/product/:productId" element={<ProductPage />}/>
                     <Route path="/favourites" element={<FavouritesPage/>}/>
+                    <Route path="/login" element={<LoginForm/>} />
+                    <Route path="/registration" element={<RegistrationForm/>}/>
+                    <Route path="/reset-password" element={<ResetPasswordForm/>}/>
                     {/* когда мы делаем запрос на рендер какого-т компонента по какому-то пути, то реакт роутер дом внутри ищет указанный url и если его не найдет, то даст path="*" 'это страница 404 ошибка */}
                     <Route path="*" element={<NotFoundPage/>}/>
                 </Routes>
+                {/* выше был роутинг для прямых ссылок, а в том месте, где в Hedere мы нажимаем на иконку UserIcon нужно подменить роутер на тот, который будет работать с модалками/ в усах пишем условие, если бекграундЛокейшен есть (который мы создали вручную), то тогда.../когда кликаем на войти (собаку) мы подменяем локейшен у роута, т.е. источник правды для его роутов, теперь правда - это бекграундЛокейшен, а не то, что в урле */}
+                {backgroundLocation && (
+                    <Routes>
+                        <Route path='/login' element={
+                            <Modal>
+                                {/*  форма может принимать стейт - пропсом/пробрасываем в него объект */}
+                                <LoginForm linkState={{backgroundLocation: location, initialPath}} />
+                            </Modal>
+                        }/>
+                         <Route path='/registration' element={
+                            <Modal>
+                                <RegistrationForm linkState={{backgroundLocation: location, initialPath}} />
+                            </Modal>
+                        }/>
+                        <Route path='/reset-password' element={
+                            <Modal>
+                                <ResetPasswordForm linkState={{backgroundLocation: location, initialPath}} />
+                            </Modal>
+                        }/>
+                    </Routes>
+                )}
 
             </main>   
             <Footer/> 

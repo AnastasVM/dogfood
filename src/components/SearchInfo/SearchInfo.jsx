@@ -1,7 +1,6 @@
 import s from "./SearchInfo.module.css";
 
 // показывает сколько товаров найдено по поиску (вводит пользователь)
-
 // принимает то, что пишем в поисковой строке и найденное колличество товаров
 const SearchInfo = ({searchText, searchCount}) => {
     return (
