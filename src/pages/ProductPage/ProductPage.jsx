@@ -1,27 +1,31 @@
-import React, { useCallback, useContext } from "react";
-import api from "../../utils/api";
+import React, { useCallback, useEffect } from "react";
 import Spinner from "../../components/Spiner/Spiner";
 import Product from "../../components/Product/Product";
 import s from '../../components/Product/Product.module.css';
 import { useParams } from "react-router-dom";
 import NotFoundPage from "../NotFoundPage/NotFoundPage";
-import useApi from "../../hooks/useApi";
-import { CardContext } from "../../context/cardContext";
+import { useDispatch, useSelector } from "react-redux";
+import { getSingleProductThunk } from "../../redux/redux-thunk/singleProduct-thunk/getSingleProductThunk";
+import { changeLikeProductThunk } from "../../redux/redux-thunk/products-thunk/changeLikeProductThunk";
+import { setProductState } from "../../redux/redux-slice/singleProduct/singleProductSlice";
 
 
 const ProductPage = () => {
     const { productId }  = useParams();
-    const { handleLike } = useContext(CardContext);
-    // можно любой метод класса апи вызвать, кладем его в хендлер и пробрасываем в кастомный хук use.Api/В массив зависимостей - если изменится id, мы зайдем на другой товар, будет новый вызов метода апи
-    const handleGetProduct = useCallback(() => api.getProductById(productId), [productId]);
-    // при деструктурозации объекта можно любое его поле переименовать, например error на isError
-    const { data: product, setData: setProduct, isLoading, error: isError } = useApi(handleGetProduct);
-     // функция обработчик события, кот. будет висеть на сердечке и по клику ставит/не ставит сердечко/обернули в юсколбек (запоминает результат вызова функции колбек и если не изменился массив зависимостей, то другого результата не будет), чтобы лишний раз не делать обращение к серверу
+    const dispatch = useDispatch();
+   
+    const { singleProduct, isLoading, error: isError } = useSelector(state => state.singleProduct);
+
+     useEffect(()=> {
+        dispatch(getSingleProductThunk(productId))
+     }, [dispatch, productId]);
+          
      const handleProductLike = useCallback(() => {
-        handleLike(product).then((updateProduct) => {
-            setProduct(updateProduct);
+    
+        dispatch(changeLikeProductThunk(singleProduct)).then(updateProduct => {
+            dispatch(setProductState(updateProduct.payload.product));
         })
-    }, [product, setProduct, handleLike]);
+    }, [dispatch, singleProduct]);
 
     return (
         <>
@@ -32,7 +36,7 @@ const ProductPage = () => {
                       
             ) : (
                 // если ошибки нет, то показываем нашу страницу продукта, а если есть покажем NotFound, а иначе нал
-                !isError && <Product {...product} onProductLike={handleProductLike}/>
+                !isError && <Product {...singleProduct} onProductLike={handleProductLike}/>
                 )}
                 {isError ? (
                     <NotFoundPage/>

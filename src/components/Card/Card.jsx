@@ -4,21 +4,23 @@ import { ReactComponent as Save} from "./save.svg";
 import cn from "classnames";
 import { calcDiscountPrice, isLiked} from '../../utils/products';
 import { Link } from 'react-router-dom';
-import { useContext } from 'react';
-import { CardContext } from '../../context/cardContext';
 import CardSkeleton from '../../components/CardSkeleton/CardSkeleton';
+import { useSelector, useDispatch } from 'react-redux';
+import { useCallback } from 'react';
+import { changeLikeProductThunk } from '../../redux/redux-thunk/products-thunk/changeLikeProductThunk';
 
 // использует деструкторизацию ключей объекта
-const Card = ({ name, price, discount, wight, description, pictures, tags, currentUser, likes, _id }) => {
+const Card = ({ name, price, discount, wight, description, pictures, tags, likes, _id }) => {
+    const { userInfo, isLoading } = useSelector(state => state.user);
     // считаем прайс со скидкой/ округляем до ближайшего целого числа (ф-ция в утилитах)
     const discountPrice = calcDiscountPrice(price, discount);
     // currentUser?._id эта запись эквивалентна currentUser ? currentUser._id : '' - если юзер есть, то возьми у него id иначе ничего не берем. Если структура вложенности есть еще, то можно продолжать уточения/проверку currentUser?._id?.trolololo
-    const liked = isLiked(likes, currentUser?._id);
-    const { handleLike, isLoading } = useContext(CardContext);
+    const liked = isLiked(likes, userInfo?._id);
+    const dispatch = useDispatch();
 
-    const handleLikeClick = () => {
-        handleLike({_id, likes});
-    }
+      const handleLikeClick = useCallback(() => {
+        return dispatch(changeLikeProductThunk({_id, likes}));
+    }, [_id, dispatch, likes]);
 
   return (
     <>

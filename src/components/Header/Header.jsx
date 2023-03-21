@@ -5,15 +5,13 @@ import cn from 'classnames';
 import { Link, useLocation } from 'react-router-dom';
 import {ReactComponent as FavouriteIcon} from './img/favorites.svg';
 import {ReactComponent as UserIcon} from './img/profile.svg';
-import { useContext } from 'react';
-import { CardContext } from '../../context/cardContext';
+import { useSelector } from 'react-redux';
 
 
 const Header = ({ children, setModalOpen}) => {
 
-    const { favourites } = useContext(CardContext);
+    const {favourites} = useSelector(state => state.products);
     const location = useLocation();
-    console.log('location--->', location);
   
     return (
         <header className={cn(s.header, 'cover')}>

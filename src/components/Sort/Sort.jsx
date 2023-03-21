@@ -1,8 +1,9 @@
-import "./index.css";
+import s from "./Sort.module.css";
+import cn from "classnames";
 
 const Sort = () => {
     return (
-        <div>Sort</div>
+        <div className={cn(s.sort)}>Sort</div>
     );
 };
 
