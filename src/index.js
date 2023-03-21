@@ -10,8 +10,9 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // подключаем наш store из пакета реакт-редакс, оборачивая весь проект в провайдер => у нас появляется доступ внутри нашего приложения к хукам из пакета react-redux (юсСелектор(чтобы обратится к стору и взять данные) и useDispatch(для активации какого-то экщена))
     <Provider store={store}>
-        <HashRouter>
+        {/* для гитхаба меняем роут BrowserRouter на HashRouter, но он добавляет #, поэтому локально работем на BrowserRouter, потом при заливке на гитхаб нужно поменять */}
+        <BrowserRouter>
             <App />
-        </HashRouter>
+        </BrowserRouter>
     </Provider>
 );

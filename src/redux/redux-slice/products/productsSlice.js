@@ -3,6 +3,7 @@ import { getAllProductsThunk } from "../../redux-thunk/products-thunk/getAllProd
 import { isError } from "../../../utils/utilStore";
 import { isLiked } from "../../../utils/products";
 import { changeLikeProductThunk } from "../../redux-thunk/products-thunk/changeLikeProductThunk";
+import { SORTED } from "../../../utils/constants";
 
 // первоначальное состояние нашего стора
 const initialState = {
@@ -10,6 +11,8 @@ const initialState = {
     products: [],
     // отдельное хранилище для избранного
     favourites: [],
+    // изначально отображаем продукты, как прилетели, без сортировки
+    currentSort: '',
     total: 0,
     // загрузка
     isLoading: false,
@@ -21,8 +24,31 @@ const productsSlice = createSlice({
     // нейм слайса, очень важно - это типа экшен/именно по данному имени подставили в typePrefix в getAllProductsThunk
     name: 'products',
     initialState,
-    // обычный редьюсер работает с изменением текущего стора(синхронный)
-    reducers:{},
+    // обычный редьюсер работает с изменением текущего стора(синхронный)/пишем редьюсер для сортировки, сортируем на фронте, без запросов с сервера
+    reducers:{
+        sortedProductsState: (state, action) => {
+            switch (action.payload) {
+                case SORTED.LOW:
+                    // сначало дещевые
+                    state.products = state.products.sort((a, b) => b.price - a.price);
+                    state.currentSort = action.payload;
+                    break;
+                case SORTED.CHEAP:
+                    // сначало дорогие
+                    state.products = state.products.sort((a, b) => a.price - b.price);
+                    state.currentSort = action.payload;
+                    break;
+                case SORTED.SALE:
+                    // по скидке
+                    state.products = state.products.sort((a, b) => b.discount - a.discount);
+                    state.currentSort = action.payload;
+                    break;
+                default: 
+                    state.products = state.products.sort((a, b) => b.likes.length - a.likes.length);
+                    state.currentSort = SORTED.POPULAR;  
+            }
+        }
+    },
     // редьюсеры для ассинхронной работы/ builder - это объект у которого есть ф-ция addCase, куда мы добавляем один срез работы со стором и туда нам нужно опрокинуть ассинхронный запросс
     extraReducers: (builder) => {
         // функция принимает первый аргумент сам промис, указали состояние уже выполненого промиса(fulfilled), а второй это колбек - это наш редьюсер в котором два аргумента (стейт и акшен)/если кейс выполнится, то редьюсер будет проводить следующую операцию
@@ -72,5 +98,7 @@ const productsSlice = createSlice({
     }
 
 });
+
+export const {sortedProductsState} = productsSlice.actions;
 
 export default productsSlice.reducer;
