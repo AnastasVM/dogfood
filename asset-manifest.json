@@ -1,24 +1,28 @@
 {
   "files": {
-    "main.css": "/dogfood/static/css/main.8f4bf159.css",
-    "main.js": "/dogfood/static/js/main.37bc99d8.js",
+    "main.css": "/dogfood/static/css/main.64c21af5.css",
+    "main.js": "/dogfood/static/js/main.8aff9024.js",
     "static/media/logo.svg": "/dogfood/static/media/logo.6fda55deb92277d4c00b020dcbfc5923.svg",
     "static/media/quality.svg": "/dogfood/static/media/quality.8eb6560a188790582a8aaddc99e116ea.svg",
     "static/media/instagram.svg": "/dogfood/static/media/instagram.ee343c224c183f85022c39390295aaf3.svg",
     "static/media/viber.svg": "/dogfood/static/media/viber.c4496b37de624f441451147a5cb2a180.svg",
+    "static/media/profile.svg": "/dogfood/static/media/profile.729126b1bcb8117915d560065baf7c93.svg",
     "static/media/whatsapp.svg": "/dogfood/static/media/whatsapp.54103d61108242ecc8bdf082f6dda89b.svg",
+    "static/media/ic-notfound.svg": "/dogfood/static/media/ic-notfound.f171a9df9cff8e143d72895d8272134c.svg",
     "static/media/vk.svg": "/dogfood/static/media/vk.10a8eaae72b1edd421b5bc7a6c31d978.svg",
     "static/media/save.svg": "/dogfood/static/media/save.65277ad5538e2dd736d5a339ad1051ab.svg",
     "static/media/truck.svg": "/dogfood/static/media/truck.ea6acb9f2b133040e9f295fbb9f2a3ab.svg",
     "static/media/ic-close-input.svg": "/dogfood/static/media/ic-close-input.f01e03cf609912dcdf78b1a91e354837.svg",
+    "static/media/favorites.svg": "/dogfood/static/media/favorites.7e0553bf58983cb5148785c7f89ba517.svg",
     "static/media/telegram.svg": "/dogfood/static/media/telegram.981bf346c4dec9b6abd58d96468507b2.svg",
     "static/media/ic-search.svg": "/dogfood/static/media/ic-search.296528dfccff6373f75e8f75d02e833a.svg",
     "index.html": "/dogfood/index.html",
-    "main.8f4bf159.css.map": "/dogfood/static/css/main.8f4bf159.css.map",
-    "main.37bc99d8.js.map": "/dogfood/static/js/main.37bc99d8.js.map"
+    "static/media/leftArrow.svg": "/dogfood/static/media/leftArrow.b167330d8bc7c10d5b78260b4c854e5b.svg",
+    "main.64c21af5.css.map": "/dogfood/static/css/main.64c21af5.css.map",
+    "main.8aff9024.js.map": "/dogfood/static/js/main.8aff9024.js.map"
   },
   "entrypoints": [
-    "static/css/main.8f4bf159.css",
-    "static/js/main.37bc99d8.js"
+    "static/css/main.64c21af5.css",
+    "static/js/main.8aff9024.js"
   ]
 }
