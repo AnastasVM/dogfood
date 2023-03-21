@@ -15,17 +15,9 @@
     transition: .2s;
 }
 
-.sortLinkSelected {
-    color: #1A1A1A;
-}
-
 .sortLink:hover {
     cursor: pointer;
     color: var(--text-main-color);
-}
-
-.sortLink:hover {
-    color: #1A1A1A;
 }
 
 .sortLinkSelected {
