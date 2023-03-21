@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import s from './Product.module.css';
 import { calcDiscountPrice, createMarkup, isLiked } from "../../utils/products";
 import cn from "classnames";
@@ -7,18 +7,17 @@ import {ReactComponent as Save} from "./image/save.svg";
 // делаем путь к src
 import truck from './image/truck.svg';
 import quality from './image/quality.svg';
-import { useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/userContext";
 import ContentHeader from "../ContentHeader/ContentHeader";
+import { useSelector } from "react-redux";
+
 
 const Product = ({ _id, onProductLike, available, description, discount, price, name, pictures, likes}) => {
 
-    const navigate = useNavigate();
-    const { user: currentUser } = useContext(UserContext);
+    const {userInfo} = useSelector(state => state.user);
     // считаем прайс со скидкой/ округляем до ближайшего целого числа (ф-ция в утилитах)
     const discountPrice = calcDiscountPrice(price, discount);
      // currentUser?._id эта запись эквивалентна currentUser ? currentUser._id : '' - если юзер есть, то возьми у него id иначе ничего не берем. Если структура вложенности есть еще, то можно продолжать уточения/проверку currentUser?._id?.trolololo
-     const liked = isLiked(likes, currentUser?._id);
+     const liked = isLiked(likes, userInfo?._id);
      const descriptionHtml = createMarkup(description);
 
     return (

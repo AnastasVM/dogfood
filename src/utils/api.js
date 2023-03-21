@@ -1,6 +1,6 @@
 // функция обрабатывающая положительный либо отрицательный ответ с сервера
 const onResponse = (res) => {
-    return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
+    return res.ok ? res.json() : res.json().then(err => Promise.reject(err));
 }
 
 

@@ -21,11 +21,11 @@ const LoginForm = ({linkState}) => {
         }
     });
     
-    const passwordRegister = register('email', {
+    const passwordRegister = register('password', {
         required: 'Обязательное поле',
         pattern: {
-            value: /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/,
-            message: "Не валидный email"
+            value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+            message: "Пароль должен содержать минимум восемь символов, одну букву латинского алфавита и одну цифру"
         }
     });
 
