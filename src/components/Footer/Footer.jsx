@@ -5,6 +5,7 @@ import viber from "./img/viber.svg";
 import whatsapp from "./img/whatsapp.svg";
 import vk from "./img/vk.svg";
 import Logo from '../Logo/Logo';
+import { Link } from 'react-router-dom';
 
 
 const Footer = () => {
@@ -39,9 +40,9 @@ const Footer = () => {
                             <a href="/catalogue" className="menu-bottom__item">
                                 Оплата и доставка
                             </a>
-                            <a href="/catalogue" className="menu-bottom__item">
+                            <Link to="/faq" className="menu-bottom__item">
                                 Часто спрашивают
-                            </a>
+                            </Link>
                             <a href="/catalogue" className="menu-bottom__item">
                                 Обратная связь
                             </a>
