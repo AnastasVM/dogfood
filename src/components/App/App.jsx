@@ -18,18 +18,17 @@ import ResetPasswordForm from '../Forms/ResetPasswordForm/ResetPasswordForm';
 import { useDispatch } from 'react-redux';
 import { getAllProductsThunk } from '../../redux/redux-thunk/products-thunk/getAllProductsThunk';
 import { getUserInfoThunk } from '../../redux/redux-thunk/user-thunk/getUserInfoThunk';
+import FAQPage from '../../pages/FAQPage/FAQPage';
 
 function Application() {
    
     const [cards, setCards] = useState([]);
     //хранит данные избранное(есть лайки), далее пробрасываем в контекст
-    const [favourites, setFavourites] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     // нужно хранить строку которую вводит пользователь, ее нужно положить в стэйт
     const [searchQuery, setSearchQuery] = useState('');
     // спинер
     const [isLoading, setIsLoading] = useState(false);
-    const [contacts, setContacts] = useState([]);
     // сохраняем в переменную вывод вводимой строки с задержкой
     const debounceSearchQuery = useDebounce(searchQuery, 300);
     const location = useLocation();
@@ -111,6 +110,7 @@ function Application() {
                     <Route path="/product/:productId" element={<ProductPage />}/>
                     <Route path="/favourites" element={<FavouritesPage/>}/>
                     <Route path="/login" element={<LoginForm/>} />
+                    <Route path="/faq" element={<FAQPage/>} />
                     <Route path="/registration" element={<RegistrationForm/>}/>
                     <Route path="/reset-password" element={<ResetPasswordForm/>}/>
                     {/* когда мы делаем запрос на рендер какого-т компонента по какому-то пути, то реакт роутер дом внутри ищет указанный url и если его не найдет, то даст path="*" 'это страница 404 ошибка */}
