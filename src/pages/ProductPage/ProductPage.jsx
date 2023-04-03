@@ -21,7 +21,6 @@ const ProductPage = () => {
      }, [dispatch, productId]);
           
      const handleProductLike = useCallback(() => {
-    
         dispatch(changeLikeProductThunk(singleProduct)).then(updateProduct => {
             dispatch(setProductState(updateProduct.payload.product));
         })

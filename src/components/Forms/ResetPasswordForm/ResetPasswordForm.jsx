@@ -3,6 +3,7 @@ import {useForm} from "react-hook-form";
 import s from "../RegistrationForm/RegistrationForm.module.css";
 import InputText from "../../InputText/InputText";
 import Button from "../../Button/Button";
+import { REGEXP_EMAIL, VALIDATE_MESSAGE } from "../../../utils/constants";
 
 const ResetPasswordForm = () => {
     const {register, handleSubmit, formState: {errors}} = useForm({mode: 'onBlur'});
@@ -13,10 +14,10 @@ const ResetPasswordForm = () => {
     }
 
     const emailRegister = register('email', {
-        required: 'Обязательное поле',
+        required: VALIDATE_MESSAGE.requiredMessage,
         pattern: {
-            value: /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/,
-            message: 'Не валидный email'
+            value: REGEXP_EMAIL,
+            message: VALIDATE_MESSAGE.emailMessage,
         }
     });
 

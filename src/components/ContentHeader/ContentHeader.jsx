@@ -7,7 +7,8 @@ const ContentHeader = ({title, children}) => {
     const navigate = useNavigate();
     return (
     <div>
-       <a href="#" className={s.buttonBack} onClick={() => navigate(-1)}> <Arrow/>Назад</a>
+       <a className={s.buttonBack} onClick={() => navigate(-1)}>
+        <Arrow/>Назад</a>
        <h1 className={s.title}>{title}</h1>
        {children}
     </div>

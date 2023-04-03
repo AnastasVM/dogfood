@@ -8,9 +8,11 @@ export const changeLikeProductThunk = createAsyncThunk(
     async function(product, {rejectWithValue, fulfillWithValue, dispatch, getState, extra: api}) {
         // в корневом файле стора сделаем настройку, чтобы это поле extra (это кастомная настройка мидлвара) перемеименовали на api более нам привычно
         try {
+             // достаем токен из локалсторож
+            const token = localStorage.getItem('jwt');
             const { user: { userInfo } } = getState();
             const liked = isLiked(product.likes, userInfo._id);
-            const data = await api.changeLikeProduct(product._id, liked);
+            const data = await api.changeLikeProduct(product._id, liked, token);
         return fulfillWithValue({product: data, liked});
         } catch (e) {
             return rejectWithValue(e);
