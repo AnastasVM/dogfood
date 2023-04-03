@@ -17,8 +17,12 @@ import LoginForm from '../Forms/LoginForm/LoginForm';
 import ResetPasswordForm from '../Forms/ResetPasswordForm/ResetPasswordForm';
 import { useDispatch } from 'react-redux';
 import { getAllProductsThunk } from '../../redux/redux-thunk/products-thunk/getAllProductsThunk';
-import { getUserInfoThunk } from '../../redux/redux-thunk/user-thunk/getUserInfoThunk';
+// import { getUserInfoThunk } from '../../redux/redux-thunk/user-thunk/getUserInfoThunk';
 import FAQPage from '../../pages/FAQPage/FAQPage';
+import MainPage from '../../pages/MainPage/MainPage';
+import ProtectedRoute from '../ProtectedRoute/ProtectedRoute';
+import { checkTokenThunk } from '../../redux/redux-thunk/user-thunk/checkTokenThunk';
+import ProfilePage from '../../pages/ProfilePage/ProfilePage';
 
 function Application() {
    
@@ -39,24 +43,36 @@ function Application() {
 
     const dispatch = useDispatch();
 
+    // достаем токен из локалсторож и прокидываем его в checkTokenThunk
+    const token = localStorage.getItem('jwt');
+    console.log('token---->', token);
+
     useEffect(() => {
         // дождемся, когда промис с информацией о пользователе выполнится, а только потом дернем все продукты (тогда все лайки и прочие не слетят)
-       const userData =  dispatch(getUserInfoThunk());
-       userData.then(()=> {
-        dispatch(getAllProductsThunk());
-       })
-    }, [dispatch]);
+       const userData =  dispatch(checkTokenThunk(token));
+        // если токен есть, тогда данные доступны
+        if (token) {
+            userData.then(()=> {
+                // отправляем запрос за всеми постами и пробрасываем актуальный токен
+                dispatch(getAllProductsThunk(token));
+            }) 
+        }
+      
+    }, [dispatch, token]);
 
     // при вводе данных пользователем searchQuery меняется (сделали с задержкой, поэтому передаем debounceSearchQuery) и с его изменениями нужно запустить handleRequest функцию
     useEffect(() => {
-        handleRequest();
+        if (token) {
+            handleRequest();
+            console.log('INPUT', debounceSearchQuery)
+        }
     }, [debounceSearchQuery]);
 
     // функция работает с данными сервера/функция запроса
     const handleRequest = () => {
         // setIsLoading(true);       
         // когда мы будем вызывать ф-цию, будем печатать текст, он будет приходить в строку searchQuery, мы отправляем его на сервер и сервер возвращает нам данные с этими карточками и  мы их записываем в стейт, стейт изменится и реакт поймет, что нужно перерендерить наш дом.
-        api.search(debounceSearchQuery).then(data => {
+        api.search(debounceSearchQuery, token).then(data => {
         setCards(data);
         // если будет ошибка
         }).catch(err => console.log(err))
@@ -93,7 +109,7 @@ function Application() {
 
                 <Routes>
                     {/* Если путь будет / то возьми и зарендери элемент поиска (на отдельной странице товара его не будет) */}
-                    <Route path="/" element={
+                    <Route path="/catalog" element={
                          <Search onInput={handleInputChange} onSubmit={handleFormSubmit}/>
                     }/>
                 </Routes>
@@ -105,14 +121,38 @@ function Application() {
                 {/* делаем роутинг модальных окон/условие, если бекграундЛокейшен есть, то возьми все, что внутри него, развернули рест оператором и в pathname пробросим initialPath если он есть, а иначе возьми свой обычный локейшен  */}
                 <Routes location={(backgroundLocation && {...backgroundLocation, pathname: initialPath} ) || location}>
                     {/* параметр path="/" это тоже самое, что index/указываем какой элемент нам нужно рендерить если пользователь запрашивает корневую страницу сайта (localhost:3000/) и прокидываем в него пропсы */}
-                    <Route index element={<CatalogPage />}/>
+                    <Route index element={<MainPage />}/>
+                    <Route path='/catalog' element={
+                            <CatalogPage />
+                    }/>
                     {/* Хотим чтобы передавались динамически параметры и хук useParams доставал эти значения/именно по данному ключу productId в компоненте страницы будем доставать эту id */}
-                    <Route path="/product/:productId" element={<ProductPage />}/>
+                    <Route path="/product/:productId" element={
+                            <ProductPage />
+                    }/>
                     <Route path="/favourites" element={<FavouritesPage/>}/>
-                    <Route path="/login" element={<LoginForm/>} />
+                    <Route path="/profile" element={
+                        // оборачиваем страницу с информацией о пользователе в протектор роут(в 6 версии именно так, т.к. дочки Routes м.б.только Route, поэтому просто роут обернуть нельзя), пока человек не прошел авторизацию
+                        <ProtectedRoute>
+                            <ProfilePage/>
+                        </ProtectedRoute>
+                    }/>
+                    <Route path="/login" element={
+                        // в реакте если мы передаем пропс isOnlyAuth нам не нужно передавать true, т.е. писать isOnlyAuth={true} достаточно передать просто название ключа, это равнозначная записать, а если нужно false, то это нужно писать
+                        <ProtectedRoute isOnlyAuth>
+                            <LoginForm/>
+                        </ProtectedRoute>
+                    } />
                     <Route path="/faq" element={<FAQPage/>} />
-                    <Route path="/registration" element={<RegistrationForm/>}/>
-                    <Route path="/reset-password" element={<ResetPasswordForm/>}/>
+                    <Route path="/registration" element={
+                        <ProtectedRoute isOnlyAuth>
+                            <RegistrationForm/>
+                        </ProtectedRoute>
+                    }/>
+                    <Route path="/reset-password" element={
+                        <ProtectedRoute isOnlyAuth>
+                            <ResetPasswordForm/>
+                        </ProtectedRoute>
+                    }/>
                     {/* когда мы делаем запрос на рендер какого-т компонента по какому-то пути, то реакт роутер дом внутри ищет указанный url и если его не найдет, то даст path="*" 'это страница 404 ошибка */}
                     <Route path="*" element={<NotFoundPage/>}/>
                 </Routes>
@@ -120,20 +160,26 @@ function Application() {
                 {backgroundLocation && (
                     <Routes>
                         <Route path='/login' element={
-                            <Modal>
-                                {/*  форма может принимать стейт - пропсом/пробрасываем в него объект */}
-                                <LoginForm linkState={{backgroundLocation: location, initialPath}} />
-                            </Modal>
+                            <ProtectedRoute isOnlyAuth>
+                                <Modal>
+                                    {/*  форма может принимать стейт - пропсом/пробрасываем в него объект */}
+                                    <LoginForm linkState={{backgroundLocation: location, initialPath}} />
+                                </Modal>
+                            </ProtectedRoute>
                         }/>
                          <Route path='/registration' element={
-                            <Modal>
-                                <RegistrationForm linkState={{backgroundLocation: location, initialPath}} />
-                            </Modal>
+                            <ProtectedRoute isOnlyAuth>
+                                <Modal>
+                                    <RegistrationForm linkState={{backgroundLocation: location, initialPath}} />
+                                </Modal>
+                            </ProtectedRoute>
                         }/>
                         <Route path='/reset-password' element={
-                            <Modal>
-                                <ResetPasswordForm linkState={{backgroundLocation: location, initialPath}} />
-                            </Modal>
+                            <ProtectedRoute isOnlyAuth>
+                                <Modal>
+                                    <ResetPasswordForm linkState={{backgroundLocation: location, initialPath}} />
+                                </Modal>
+                            </ProtectedRoute>
                         }/>
                     </Routes>
                 )}

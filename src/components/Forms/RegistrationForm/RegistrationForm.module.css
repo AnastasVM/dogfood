@@ -20,6 +20,7 @@
 
 .errorMessage {
     color: var(--primary-red-100);
+    margin: 0;
 }
 
 .description {

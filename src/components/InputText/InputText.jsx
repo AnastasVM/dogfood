@@ -19,8 +19,12 @@ const InputText = forwardRef((props, ref) => {
         input = <textarea className={cn(s.input, s.textarea, {
             [s.inputError]: errorText,
         })} placeholder={placeholder} {...restProps} />
+    } else if (type === 'password') {
+        input = <input type="password" className={cn(s.input, {
+            [s.inputError]: errorText,
+        })} placeholder={placeholder} {...restProps} />
     }
-
+    
     return (
        <div>
             {input}

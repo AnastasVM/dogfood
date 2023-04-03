@@ -28,11 +28,12 @@ const Footer = () => {
                                 Акции
                             </a>
                             <a href="/catalogue" className="menu-bottom__item">
-                                Новости
-                            </a>
-                            <a href="/catalogue" className="menu-bottom__item">
                                 Отзывы
                             </a>
+                            <Link to="/login" className="menu-bottom__item">
+                                {/* это по факту аутентификация, но чтобы пользователь понимал пишем так */}
+                                Авторизация
+                            </Link>
                         </nav>
                     </div>
                     <div className="footer__col">

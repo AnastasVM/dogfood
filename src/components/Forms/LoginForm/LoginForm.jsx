@@ -5,27 +5,36 @@ import Button from "../../Button/Button";
 import { useForm } from "react-hook-form";
 import InputText from "../../InputText/InputText";
 import {Link} from "react-router-dom";
+import { REGEXP_EMAIL, REGEXP_PASSWORD, VALIDATE_MESSAGE } from "../../../utils/constants";
+import { useSelector, useDispatch } from "react-redux";
+import { loginThunk } from "../../../redux/redux-thunk/user-thunk/loginThunk";
 
 const LoginForm = ({linkState}) => {
     const { register, handleSubmit, formState: {errors}} = useForm({mode: 'onBlur'});
+    // выводим сообщение об ошибке
+    const { error: errorRedux } = useSelector(state => state.user)
+    // вызываем санку в редаксе через хук
+    const dispatch = useDispatch();
+
     // ф-ция для обработки и отправки формы, получения входных данных, передаем ее в форму 
     const onSubmit = (data) => {
         console.log('data--->', data);
+        dispatch(loginThunk(data));
     }
 
     const emailRegister = register('email', {
-        required: 'Обязательное поле',
+        required: VALIDATE_MESSAGE.requiredMessage,
         pattern: {
-            value: /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/,
-            message: "Не валидный email"
+            value: REGEXP_EMAIL,
+            message: VALIDATE_MESSAGE.emailMessage,
         }
     });
     
     const passwordRegister = register('password', {
-        required: 'Обязательное поле',
+        required: VALIDATE_MESSAGE.requiredMessage,
         pattern: {
-            value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
-            message: "Пароль должен содержать минимум восемь символов, одну букву латинского алфавита и одну цифру"
+            value: REGEXP_PASSWORD,
+            message: VALIDATE_MESSAGE.passwordMessage,
         }
     });
 
@@ -50,7 +59,10 @@ const LoginForm = ({linkState}) => {
                 className={cn(s.description, s.resetPassword)}
                 state={linkState}
             >Восстановить пароль</Link>
-                
+            {/* если есть эта ошибка, то давай ее выведем */}
+            {errorRedux ? (
+                <p className={s.errorMessage}>{errorRedux.message}</p>
+            ) : null}    
             <Button>Войти</Button>
             {/* будет роутинг на регистрацию */}
             <Button href="/registration" 
