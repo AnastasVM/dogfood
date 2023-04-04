@@ -1,7 +1,7 @@
 
 .header {
     width: 100%;
-    background-color: #fed700;
+    background-color: var(--primary-main-color);
     padding: 12px 0;
 }
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import s from './Product.module.css';
 import { calcDiscountPrice, createMarkup, isLiked } from "../../utils/products";
 import cn from "classnames";
@@ -9,11 +9,16 @@ import truck from './image/truck.svg';
 import quality from './image/quality.svg';
 import ContentHeader from "../ContentHeader/ContentHeader";
 import { useSelector } from "react-redux";
+import Rating from "../Rating/Rating";
 
 
-const Product = ({ _id, onProductLike, available, description, discount, price, name, pictures, likes}) => {
+const Product = ({ _id, onProductLike, available, description, discount, price, name, pictures, likes, reviews}) => {
 
     const {userInfo} = useSelector(state => state.user);
+    // создаем рейтинг звезд (приходит в singleProduct => reviews=> rating)/используем юзмемо, т.к. она запоминает результат вычислений и если он не меняется не будет лишнего перерендера/reduce(acc, r) - первый аккомулятор, второй - рейтинг, а инишел значение у него 0
+    const ratingCount = useMemo(()=> Math.round(reviews?.reduce((acc, r) => acc = acc + r.rating, 0)/reviews?.length), [reviews]);
+
+
     // считаем прайс со скидкой/ округляем до ближайшего целого числа (ф-ция в утилитах)
     const discountPrice = calcDiscountPrice(price, discount);
      // currentUser?._id эта запись эквивалентна currentUser ? currentUser._id : '' - если юзер есть, то возьми у него id иначе ничего не берем. Если структура вложенности есть еще, то можно продолжать уточения/проверку currentUser?._id?.trolololo
@@ -23,9 +28,11 @@ const Product = ({ _id, onProductLike, available, description, discount, price, 
     return (
         <>
            <ContentHeader title={name}>
-                 <span>Артикул: <b>2388907</b></span>
+                <div className={s.wrapperArticle}>
+                    <span>Артикул: <b>2388907</b></span>
+                    <Rating isEditable rating={ratingCount}/> {reviews?.length} отзыва
+                 </div>
             </ContentHeader>
-
             <div className={s.product}>
                 <div className={s.imgWrapper}>
                     <img src={pictures} alt={`Изображение - ${name}`}/>

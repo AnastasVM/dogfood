@@ -9,11 +9,11 @@ const FavouritesPage = () => {
     const {favourites} = useSelector(state => state.products);
 
     return (
-        <>
+        <div className="container">
             <ContentHeader title="Избранное"/>
             <Sort/>
             <CardList cards={favourites}/>
-        </>
+        </div>
     )
 };
 

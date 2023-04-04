@@ -11,7 +11,7 @@ const CatalogPage = () => {
     const skeletonArray = skeletonFakeArray.map((el) => <CardSkeleton key={el}/>);
 
     return (
-        <>
+        <div className="container">
             <ContentHeader title="Каталог"/>
             <Sort />
             {/* Чтобы во время загрузки карточек было видно скелетон пишем условие: если массив пустой будет массив скилетонов, а если нет - карточки */}
@@ -22,7 +22,7 @@ const CatalogPage = () => {
             ) : (
                 <CardList cards={products} />
             )}
-        </>
+        </div>
     );
 };
 

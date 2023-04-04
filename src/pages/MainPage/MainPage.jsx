@@ -1,11 +1,10 @@
 import React from "react";
-import Button from "../../components/Button/Button";
+import Hero from "../../components/Hero/Hero";
 
 const MainPage = () => {
     return (
         <div>
-            MainPage
-            <Button href="catalog">В каталог</Button>
+            <Hero/>
         </div>)
 };
 
