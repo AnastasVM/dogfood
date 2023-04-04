@@ -27,7 +27,7 @@ const ProductPage = () => {
     }, [dispatch, singleProduct]);
 
     return (
-        <>
+        <div className="container">
             {isLoading ? (
                 <div className={s.wrapperLoader}>
                      <Spinner /> 
@@ -40,7 +40,7 @@ const ProductPage = () => {
                 {isError ? (
                     <NotFoundPage/>
                 ) : null}
-        </>
+        </div>
     )
 };
 

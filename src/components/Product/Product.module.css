@@ -21,6 +21,11 @@
     margin-bottom: 40px;
 }
 
+.wrapperArticle {
+    display: flex;
+    gap: 18px;
+}
+
 .productTitle {
     margin-top: 0;
     font-weight: 800;

@@ -18,16 +18,17 @@ body {
   margin: 0 auto;
 }
 
+.container__inner {
+  margin-top: 20px;
+}
+  
+
 img {
   max-width: 100%;
 }
 
 .content {
-  padding: 20px 0;
   flex-grow: 1;
-  /* display: flex;
-  justify-content: center;
-  align-items: center; */
 }
 
 .content__sort {
@@ -48,4 +49,5 @@ img {
   --primary-red-100: #F44336;
   --border-grey-10: #CFD8DC;
   --secondary-text: #7B8E98;
+  --star-color: #FFAA0D;
 }

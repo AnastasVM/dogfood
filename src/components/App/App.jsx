@@ -115,7 +115,7 @@ function Application() {
                 </Routes>
             </Header>
             {/* чтобы футер прилип книзу */}
-            <main className='content container'>
+            <main className='content'>
                 {/* принимает кол-во карточек и введеный текст */}
                 <SearchInfo searchCount={cards.length} searchText={searchQuery}/>
                 {/* делаем роутинг модальных окон/условие, если бекграундЛокейшен есть, то возьми все, что внутри него, развернули рест оператором и в pathname пробросим initialPath если он есть, а иначе возьми свой обычный локейшен  */}
