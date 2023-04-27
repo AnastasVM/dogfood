@@ -4,6 +4,7 @@ import { isError } from "../../../utils/utilStore";
 import { isLiked } from "../../../utils/products";
 import { changeLikeProductThunk } from "../../redux-thunk/products-thunk/changeLikeProductThunk";
 import { SORTED } from "../../../utils/constants";
+import { getSearchQueryThunk } from "../../redux-thunk/products-thunk/getSearchQueryThunk";
 
 // первоначальное состояние нашего стора
 const initialState = {
@@ -68,6 +69,7 @@ const productsSlice = createSlice({
         })
 
         builder.addCase(changeLikeProductThunk.fulfilled, (state, action) => {
+            state.isLoading = false;
             const { product, liked } = action.payload;
 
             state.products = state.products.map((cardState) => {
@@ -89,7 +91,18 @@ const productsSlice = createSlice({
             state.error = null;
             state.isLoading = true;
         })
-       
+        
+        builder.addCase(getSearchQueryThunk.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.products = action.payload;
+        })
+
+          //загрузка, чтобы лоудинг корректно работал
+          builder.addCase(getSearchQueryThunk.pending, state => {
+            state.error = null;
+            state.isLoading = true;
+        })
+
         // любой промис если упал, зашел сюда, ошибку забрал и записал, в стейте всегда это будет видно/ первый аргумент ф-ция из products.js, второй - наш редьюсер/будет работать для всех санков, нет дублирования кода
         builder.addMatcher(isError, (state, action) => {
             state.error = action.payload;

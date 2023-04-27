@@ -15,24 +15,21 @@ import RegistrationForm from '../Forms/RegistrationForm/RegistrationForm';
 import Modal from '../Modal/Modal';
 import LoginForm from '../Forms/LoginForm/LoginForm';
 import ResetPasswordForm from '../Forms/ResetPasswordForm/ResetPasswordForm';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getAllProductsThunk } from '../../redux/redux-thunk/products-thunk/getAllProductsThunk';
-// import { getUserInfoThunk } from '../../redux/redux-thunk/user-thunk/getUserInfoThunk';
 import FAQPage from '../../pages/FAQPage/FAQPage';
 import MainPage from '../../pages/MainPage/MainPage';
 import ProtectedRoute from '../ProtectedRoute/ProtectedRoute';
 import { checkTokenThunk } from '../../redux/redux-thunk/user-thunk/checkTokenThunk';
 import ProfilePage from '../../pages/ProfilePage/ProfilePage';
+import { getSearchQueryThunk } from '../../redux/redux-thunk/products-thunk/getSearchQueryThunk';
 
 function Application() {
-   
-    const [cards, setCards] = useState([]);
     //хранит данные избранное(есть лайки), далее пробрасываем в контекст
     const [currentUser, setCurrentUser] = useState(null);
     // нужно хранить строку которую вводит пользователь, ее нужно положить в стэйт
     const [searchQuery, setSearchQuery] = useState('');
-    // спинер
-    const [isLoading, setIsLoading] = useState(false);
+    const { products} = useSelector(state => state.products);
     // сохраняем в переменную вывод вводимой строки с задержкой
     const debounceSearchQuery = useDebounce(searchQuery, 300);
     const location = useLocation();
@@ -69,16 +66,9 @@ function Application() {
     }, [debounceSearchQuery]);
 
     // функция работает с данными сервера/функция запроса
-    const handleRequest = () => {
-        // setIsLoading(true);       
-        // когда мы будем вызывать ф-цию, будем печатать текст, он будет приходить в строку searchQuery, мы отправляем его на сервер и сервер возвращает нам данные с этими карточками и  мы их записываем в стейт, стейт изменится и реакт поймет, что нужно перерендерить наш дом.
-        api.search(debounceSearchQuery, token).then(data => {
-        setCards(data);
-        // если будет ошибка
-        }).catch(err => console.log(err))
-        .finally(() => {
-            // setIsLoading(false);
-        })
+    const handleRequest = async () => {
+        // searchQuary: debounceSearchQuery так пишется, т.к. нужно передать ключ и значение этого параметра, если просто debounceSearchQuery, то не сработает, так как это означает debounceSearchQuery:debounceSearchQuery, а санках ждут searchQuary
+        await dispatch(getSearchQueryThunk({searchQuary: debounceSearchQuery, token}));   
     }
 
     // функция будет брать данные из формы/во время поиска при нажатии на лупу, вызыввем функцию и отменяем поведение браузера по умолчанию
@@ -117,7 +107,7 @@ function Application() {
             {/* чтобы футер прилип книзу */}
             <main className='content'>
                 {/* принимает кол-во карточек и введеный текст */}
-                <SearchInfo searchCount={cards.length} searchText={searchQuery}/>
+                <SearchInfo searchCount={products.length} searchText={searchQuery}/>
                 {/* делаем роутинг модальных окон/условие, если бекграундЛокейшен есть, то возьми все, что внутри него, развернули рест оператором и в pathname пробросим initialPath если он есть, а иначе возьми свой обычный локейшен  */}
                 <Routes location={(backgroundLocation && {...backgroundLocation, pathname: initialPath} ) || location}>
                     {/* параметр path="/" это тоже самое, что index/указываем какой элемент нам нужно рендерить если пользователь запрашивает корневую страницу сайта (localhost:3000/) и прокидываем в него пропсы */}
